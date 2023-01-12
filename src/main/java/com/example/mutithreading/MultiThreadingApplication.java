@@ -40,7 +40,15 @@ public class MultiThreadingApplication implements CommandLineRunner {
 
 		// Example 6 - daemons & Thread groups
 		//threadService.example6Simple();
-		threadService.example6Mid();
+		//threadService.example6Mid();
+
+		// Example 7 - Wep Page Download
+		//threadService.example7Simple();
+		//threadService.example7Mid();
+
+		// Example 8 - Interrupt Threads
+		//threadService.example8();
+
 	}
 
 }

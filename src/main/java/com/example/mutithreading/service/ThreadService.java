@@ -1,5 +1,7 @@
 package com.example.mutithreading.service;
 
+import com.example.mutithreading.beans.staticTypes.Constants;
+import com.example.mutithreading.tasks.runnable.PageDownloader;
 import com.example.mutithreading.tasks.runnable.RunnableExp;
 import com.example.mutithreading.tasks.thread.ThreadExp;
 import lombok.extern.slf4j.Slf4j;
@@ -249,5 +251,62 @@ public class ThreadService {
         /*
          *
          * */
+    }
+
+    public void example7Simple() {
+        Thread pageDownloader = new Thread(new PageDownloader(Constants.urls));
+
+        try {
+            long startTime = System.currentTimeMillis();
+            pageDownloader.start();
+            pageDownloader.join();
+            long endTime = System.currentTimeMillis();
+            log.info("Total time: {}s", (endTime - startTime)/100);
+        } catch (InterruptedException ex) {
+            log.info("InterruptedException while joining example-7");
+            ex.printStackTrace();
+        }
+    }
+
+    public void example7Mid() {
+        Thread pageDownloader = new Thread(new PageDownloader(Constants.urls.subList(0,3)));
+        Thread pageDownloader2 = new Thread(new PageDownloader(Constants.urls.subList(3,6)));
+
+        try {
+            long startTime = System.currentTimeMillis();
+            pageDownloader.start();
+            pageDownloader2.start();
+            pageDownloader.join();
+            pageDownloader2.join();
+            long endTime = System.currentTimeMillis();
+            log.info("Total time: {}s", (endTime - startTime)/100);
+        } catch (InterruptedException ex) {
+            log.info("InterruptedException while joining example-7");
+            ex.printStackTrace();
+        }
+    }
+
+    public void example8() {
+        Thread pageDownloader = new Thread(new PageDownloader(Constants.urls.subList(0,3)));
+        Thread pageDownloader2 = new Thread(new PageDownloader(Constants.urls.subList(3,6)));
+
+        try {
+            long startTime = System.currentTimeMillis();
+            pageDownloader.start();
+            pageDownloader2.start();
+
+            Thread.sleep(10000);
+
+            pageDownloader.interrupt();
+            // Biraz hata fırlatacak ancak işi yarıda kesecektir. Hatanın sebebi sleep yapılmış olmasına rağmen kesmeye çalışmamızdır
+            // Thread sleep uygulanmamış olursa bu hata alınmayacaktır.
+            // Interrupted exception fırlatır hatayı yakalar ve ön yüze yansıtmaz. Arkada thread'i durdurmuş olur.
+            pageDownloader2.join();
+            long endTime = System.currentTimeMillis();
+            log.info("Total time: {}s", (endTime - startTime)/100);
+        } catch (InterruptedException ex) {
+            log.info("InterruptedException while joining example-7");
+            ex.printStackTrace();
+        }
     }
 }
