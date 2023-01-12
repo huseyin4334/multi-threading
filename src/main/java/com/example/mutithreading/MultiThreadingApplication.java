@@ -29,7 +29,18 @@ public class MultiThreadingApplication implements CommandLineRunner {
 		//threadService.example2();
 
 		// Example 3 - State in Threads
-		threadService.example3();
+		//threadService.example3Simple();
+		//threadService.example3Mid();
+
+		// Example 4 - isAlive()
+		//threadService.example4();
+
+		// Example 5 - priority
+		//threadService.example5();
+
+		// Example 6 - daemons & Thread groups
+		//threadService.example6Simple();
+		threadService.example6Mid();
 	}
 
 }
