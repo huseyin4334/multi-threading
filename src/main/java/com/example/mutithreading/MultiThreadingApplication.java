@@ -8,6 +8,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.util.concurrent.TimeUnit;
+
 @Slf4j
 @SpringBootApplication
 public class MultiThreadingApplication implements CommandLineRunner {
@@ -54,6 +56,21 @@ public class MultiThreadingApplication implements CommandLineRunner {
 
 		// Example 10 - Synchronization in Shared Resources
 		//threadService.example10(true);
+
+		// Example 11 - Deadlock Simulation
+		//threadService.example11();
+
+		// Example 12 - .lock() & .unlock() for deadlock solution
+		//threadService.example12();
+
+		// Example 13 - .tryLock() for deadlock solution
+		// tryLock without timeout
+		//threadService.example13(null, null, false);
+		// tryLock with timeout
+		//threadService.example13(10, TimeUnit.SECONDS, true);
+
+		// Example 14 - StampedLock for write and read
+		//threadService.example14(null, null, false);
 
 	}
 

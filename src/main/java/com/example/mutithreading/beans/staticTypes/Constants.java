@@ -13,4 +13,7 @@ public class Constants {
     );
 
     public static int myNum;
+
+    public static final String WRITE = "write";
+    public static final String READ = "read";
 }

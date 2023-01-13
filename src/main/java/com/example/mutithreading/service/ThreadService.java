@@ -1,16 +1,28 @@
 package com.example.mutithreading.service;
 
 import com.example.mutithreading.beans.normal.Counter;
+import com.example.mutithreading.beans.normal.deadlock.ResourceOne;
+import com.example.mutithreading.beans.normal.deadlock.ResourceTwo;
+import com.example.mutithreading.beans.normal.lock.LockResourceOne;
+import com.example.mutithreading.beans.normal.lock.LockResourceTwo;
+import com.example.mutithreading.beans.normal.stampedLock.StampedLockResourceOne;
+import com.example.mutithreading.beans.normal.stampedLock.StampedLockResourceTwo;
 import com.example.mutithreading.beans.staticTypes.Constants;
-import com.example.mutithreading.tasks.runnable.PageDownloader;
-import com.example.mutithreading.tasks.runnable.RunnableExp;
-import com.example.mutithreading.tasks.runnable.Synchronize;
-import com.example.mutithreading.tasks.runnable.SynchronizeSharedResources;
+import com.example.mutithreading.tasks.runnable.*;
+import com.example.mutithreading.tasks.runnable.deadlock.TaskOne;
+import com.example.mutithreading.tasks.runnable.deadlock.TaskTwo;
+import com.example.mutithreading.tasks.runnable.lock.LockTaskOne;
+import com.example.mutithreading.tasks.runnable.lock.LockTaskTwo;
+import com.example.mutithreading.tasks.runnable.stampedLock.StampedLockTaskOne;
+import com.example.mutithreading.tasks.runnable.stampedLock.StampedLockTaskTwo;
+import com.example.mutithreading.tasks.runnable.tryLock.TryLockTaskOne;
+import com.example.mutithreading.tasks.runnable.tryLock.TryLockTaskTwo;
 import com.example.mutithreading.tasks.thread.ThreadExp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -30,6 +42,7 @@ public class ThreadService {
 
         return thread;
     }
+
     public Thread runnableExp(String name, boolean debugMode) {
         Thread thread = new Thread(new RunnableExp());
         if (name != null && !name.isBlank())
@@ -43,6 +56,7 @@ public class ThreadService {
 
         return thread;
     }
+
     public void callableExp() {
         Thread thread = new Thread(new RunnableExp());
         thread.start();
@@ -356,6 +370,100 @@ public class ThreadService {
         }
         /*
          * Paylaşılan kaynaklarda erişimi ve üzerine yazmayı nasıl yönetebileceğimizi örneklendirdik.
+         */
+    }
+
+    public void example11() {
+        Thread worker1 = new Thread(new TaskOne(new ResourceOne(), new ResourceTwo()), "Task-1");
+        Thread worker2 = new Thread(new TaskTwo(new ResourceOne(), new ResourceTwo()), "Task-2");
+
+        try {
+            worker1.start();
+            worker2.start();
+            worker1.join();
+            worker2.join();
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+        /*
+         * Bu yapı deadlock'a yol açacaktır.
+         * Sebebi şöyle;
+         * task1 ilk aşama olarak resourceOne kaynağını kilitleyecetir.
+         * task2 ilk aşama olarak resourceTwo kaynağını kilitleyecetir.
+         * task1 işlemi devam ettirip resourceOne'ın kilidini kaldırabilmesi için resourceTwo'ya erişmesi gerekiyor.
+         * Tam tersi task2 için geçerli bu sebeple işlem devam edemiyor, deadlock oluyor ve interruptedException hatası alınıyor.
+         * Bu deadlock senaryosunun adı hold and wait
+         */
+    }
+
+    public void example12() {
+        LockResourceOne one = new LockResourceOne();
+        LockResourceTwo two = new LockResourceTwo();
+
+        Thread worker1 = new Thread(new LockTaskOne(one, two), "Task-1");
+        Thread worker2 = new Thread(new LockTaskTwo(one, two), "Task-2");
+
+        try {
+            worker1.start();
+            worker2.start();
+            worker1.join();
+            worker2.join();
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+        /*
+         * Bu yapı deadlock'a yol açmayacaktır.
+         * Çünkü nesne üzerindeki lock işlemin bitmesi ardından kaldırılacaktır.
+         * Böylece istek almaya devam edecektir.
+         */
+    }
+
+    public void example13(Integer timeOut, TimeUnit timeUnit, boolean timeOutEnabled) {
+        LockResourceOne one = new LockResourceOne(timeOut, timeUnit);
+        LockResourceTwo two = new LockResourceTwo(timeOut, timeUnit);
+
+        Thread worker1 = new Thread(new TryLockTaskOne(one, two, timeOutEnabled), "Task-1");
+        Thread worker2 = new Thread(new TryLockTaskTwo(one, two, timeOutEnabled), "Task-2");
+
+        try {
+            worker1.start();
+            worker2.start();
+            worker1.join();
+            worker2.join();
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+        /*
+         * Bu yapı deadlock'a yol açmayacaktır.
+         * Çünkü nesne kilitlemeye çalışacaktır ve eğer false gelirse kilitli sayılıp yola devam edilecektir.
+         * Böylece runtime kilitlenmeyecektir.
+         * Bunun dışında tryLock ile istediğimiz süre boyunca kilit atabiliriz.
+         * Ancak interruptException alma ihtimali vardır.
+         */
+    }
+
+    public void example14(Integer timeOut, TimeUnit timeUnit, boolean timeOutEnabled) {
+        StampedLockResourceOne one = new StampedLockResourceOne(timeOut, timeUnit);
+        StampedLockResourceTwo two = new StampedLockResourceTwo(timeOut, timeUnit);
+
+        Thread worker1 = new Thread(new StampedLockTaskOne(one, two, timeOutEnabled, Constants.WRITE), "Task-1");
+        Thread worker2 = new Thread(new StampedLockTaskTwo(one, two, timeOutEnabled, Constants.WRITE), "Task-2");
+        Thread worker3 = new Thread(new StampedLockTaskTwo(one, two, timeOutEnabled, Constants.WRITE), "AnotherTask-2");
+
+        try {
+            log.info("Resources start values -> r1: {}, r2: {}", one.myNum, two.myNum);
+            worker1.start();
+            worker2.start();
+            worker3.start();
+            worker1.join();
+            worker2.join();
+            worker3.join();
+            log.info("Resources end values -> r1: {}, r2: {}", one.myNum, two.myNum);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+        /*
+         *
          */
     }
 }
