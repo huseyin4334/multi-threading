@@ -11,4 +11,6 @@ public class Constants {
             "https://skillsoft.com/about/awards",
             "https://skillsoft.com/leadersip-teams"
     );
+
+    public static int myNum;
 }

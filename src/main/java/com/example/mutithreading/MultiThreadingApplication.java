@@ -49,6 +49,12 @@ public class MultiThreadingApplication implements CommandLineRunner {
 		// Example 8 - Interrupt Threads
 		//threadService.example8();
 
+		// Example 9 - Synchronization
+		//threadService.example9(true);
+
+		// Example 10 - Synchronization in Shared Resources
+		//threadService.example10(true);
+
 	}
 
 }

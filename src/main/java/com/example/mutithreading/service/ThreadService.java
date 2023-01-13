@@ -1,8 +1,11 @@
 package com.example.mutithreading.service;
 
+import com.example.mutithreading.beans.normal.Counter;
 import com.example.mutithreading.beans.staticTypes.Constants;
 import com.example.mutithreading.tasks.runnable.PageDownloader;
 import com.example.mutithreading.tasks.runnable.RunnableExp;
+import com.example.mutithreading.tasks.runnable.Synchronize;
+import com.example.mutithreading.tasks.runnable.SynchronizeSharedResources;
 import com.example.mutithreading.tasks.thread.ThreadExp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -308,5 +311,51 @@ public class ThreadService {
             log.info("InterruptedException while joining example-7");
             ex.printStackTrace();
         }
+    }
+
+    public void example9(boolean synchronize) {
+        Thread worker1 = new Thread(new Synchronize(synchronize));
+        Thread worker2 = new Thread(new Synchronize(synchronize));
+
+        try {
+            log.info("Start value for myNum: {}", Constants.myNum);
+            worker1.start();
+            worker2.start();
+            worker1.join();
+            worker2.join();
+            log.info("End value for myNum: {}", Constants.myNum);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+        /*
+         * sync false olduğunda üst üste yazmalar sebebiyle beklenen sonuç alınamyacak ve her seferinde farklı çıktı gelecektir.
+         * true olduğunda değere aynı anda veri işlemesi yapılamayacaktır.
+         */
+    }
+
+    public void example10(boolean synchronize) {
+        Counter counter1 = new Counter();
+        Counter counter2 = new Counter();
+        Thread worker1 = new Thread(new SynchronizeSharedResources(10000, counter1, synchronize));
+        Thread worker2 = new Thread(new SynchronizeSharedResources(10000, counter2, synchronize));
+        Thread worker3 = new Thread(new SynchronizeSharedResources(10000, counter2, synchronize));
+
+        try {
+            log.info("Start value for myNum in counter-1: {}", counter1.getMyNum());
+            log.info("Start value for myNum in counter-2: {}", counter2.getMyNum());
+            worker1.start();
+            worker2.start();
+            worker3.start();
+            worker1.join();
+            worker2.join();
+            worker3.join();
+            log.info("End value for myNum in counter-1: {}", counter1.getMyNum());
+            log.info("End value for myNum in counter-2 {}", counter2.getMyNum());
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+        /*
+         * Paylaşılan kaynaklarda erişimi ve üzerine yazmayı nasıl yönetebileceğimizi örneklendirdik.
+         */
     }
 }
