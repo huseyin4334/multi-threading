@@ -442,13 +442,13 @@ public class ThreadService {
          */
     }
 
-    public void example14(Integer timeOut, TimeUnit timeUnit, boolean timeOutEnabled) {
-        StampedLockResourceOne one = new StampedLockResourceOne(timeOut, timeUnit);
-        StampedLockResourceTwo two = new StampedLockResourceTwo(timeOut, timeUnit);
+    public void example14(String operationType) {
+        StampedLockResourceOne one = new StampedLockResourceOne();
+        StampedLockResourceTwo two = new StampedLockResourceTwo();
 
-        Thread worker1 = new Thread(new StampedLockTaskOne(one, two, timeOutEnabled, Constants.WRITE), "Task-1");
-        Thread worker2 = new Thread(new StampedLockTaskTwo(one, two, timeOutEnabled, Constants.WRITE), "Task-2");
-        Thread worker3 = new Thread(new StampedLockTaskTwo(one, two, timeOutEnabled, Constants.WRITE), "AnotherTask-2");
+        Thread worker1 = new Thread(new StampedLockTaskOne(one, two, operationType), "Task-1");
+        Thread worker2 = new Thread(new StampedLockTaskTwo(one, two, operationType), "Task-2");
+        Thread worker3 = new Thread(new StampedLockTaskTwo(one, two, operationType), "AnotherTask-2");
 
         try {
             log.info("Resources start values -> r1: {}, r2: {}", one.myNum, two.myNum);
@@ -463,7 +463,8 @@ public class ThreadService {
             ex.printStackTrace();
         }
         /*
-         *
+         * Write senkron olacak şekilde işlemleri sıralamaktadır. Ve her işlem için bir long değer dönmektedir.
+         * Read işlemi bir long değer dönmektedir ancak write gibi bir kilitleme işlemi yapmamaktadır.
          */
     }
 }

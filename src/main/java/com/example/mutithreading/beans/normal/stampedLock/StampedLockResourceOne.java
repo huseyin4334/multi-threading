@@ -12,13 +12,4 @@ public class StampedLockResourceOne {
     public int myNum = 100;
 
     public StampedLock resourceLock = new StampedLock();
-
-    private Integer timeOut;
-
-    private TimeUnit timeUnit;
-
-    public StampedLockResourceOne(Integer timeOut, TimeUnit timeUnit) {
-        this.timeOut = timeOut;
-        this.timeUnit = timeUnit;
-    }
 }

@@ -13,44 +13,40 @@ import lombok.extern.slf4j.Slf4j;
 public class StampedLockTaskOne implements Runnable {
     private StampedLockResourceOne resourceOne;
     private StampedLockResourceTwo resourceTwo;
-    private boolean timeOutEnable = false;
     private String operation = Constants.WRITE;
 
     @Override
     public void run() {
         try {
-            long writeLock = resourceOne.resourceLock.writeLock();//lockIdForOne();
-            log.info("Locked on resourceOne by {}, stamp is {}", Thread.currentThread().getName(), writeLock);
-            Thread.sleep(2000);
-            resourceOne.myNum--;
-            resourceOne.resourceLock.unlock(writeLock);
-            log.info("Locked off resourceOne by {}", Thread.currentThread().getName());
+            long lock = lockIdForOne();
+            log.info("Locked on resourceOne by {}, stamp is {}", Thread.currentThread().getName(), lock);
+            int newVal = resourceOne.myNum - 10;
+            Thread.sleep(20000);
+            resourceOne.myNum = newVal;
+            resourceOne.resourceLock.unlock(lock);
+            log.info("Locked off resourceOne by {}, value: {}", Thread.currentThread().getName(), resourceOne.getMyNum());
 
-            writeLock = resourceTwo.resourceLock.writeLock();//lockIdForTwo();
-            log.info("Locked on resourceTwo by {}, stamp is {}", Thread.currentThread().getName(), writeLock);
+            lock = lockIdForTwo();
+            log.info("Locked on resourceTwo by {}, stamp is {}", Thread.currentThread().getName(), lock);
             Thread.sleep(2000);
-            resourceTwo.myNum++;
-            resourceTwo.resourceLock.unlock(writeLock);
-            log.info("Locked off resourceTwo by {}", Thread.currentThread().getName());
+            resourceTwo.myNum = resourceTwo.myNum + 5;
+            resourceTwo.resourceLock.unlock(lock);
+            log.info("Locked off resourceTwo by {}, value: {}", Thread.currentThread().getName(), resourceTwo.getMyNum());
         } catch (InterruptedException exception) {
             exception.printStackTrace();
         }
     }
 
-    private long lockIdForOne() throws InterruptedException {
+    private long lockIdForOne() {
         if (Constants.WRITE.equals(operation))
-            return timeOutEnable  ? resourceOne.resourceLock.tryWriteLock(resourceOne.getTimeOut(), resourceOne.getTimeUnit())
-                    : resourceOne.resourceLock.tryWriteLock();
+            return resourceOne.resourceLock.writeLock();
         else
-            return timeOutEnable  ? resourceOne.resourceLock.tryReadLock(resourceOne.getTimeOut(), resourceOne.getTimeUnit())
-                    : resourceOne.resourceLock.tryReadLock();
+            return resourceOne.resourceLock.readLock();
     }
-    private long lockIdForTwo() throws InterruptedException {
+    private long lockIdForTwo() {
         if (Constants.WRITE.equals(operation))
-            return timeOutEnable  ? resourceTwo.resourceLock.tryWriteLock(resourceTwo.getTimeOut(), resourceTwo.getTimeUnit())
-                    : resourceTwo.resourceLock.tryWriteLock();
+            return resourceTwo.resourceLock.writeLock();
         else
-            return timeOutEnable  ? resourceTwo.resourceLock.tryReadLock(resourceTwo.getTimeOut(), resourceTwo.getTimeUnit())
-                    : resourceTwo.resourceLock.tryReadLock();
+            return resourceTwo.resourceLock.readLock();
     }
 }

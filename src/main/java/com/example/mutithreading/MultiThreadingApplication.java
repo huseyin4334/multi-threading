@@ -1,5 +1,6 @@
 package com.example.mutithreading;
 
+import com.example.mutithreading.beans.staticTypes.Constants;
 import com.example.mutithreading.service.ThreadService;
 import com.example.mutithreading.tasks.runnable.RunnableExp;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +71,8 @@ public class MultiThreadingApplication implements CommandLineRunner {
 		//threadService.example13(10, TimeUnit.SECONDS, true);
 
 		// Example 14 - StampedLock for write and read
-		//threadService.example14(null, null, false);
+		//threadService.example14(Constants.WRITE);
+		//threadService.example14(Constants.READ);
 
 	}
 
