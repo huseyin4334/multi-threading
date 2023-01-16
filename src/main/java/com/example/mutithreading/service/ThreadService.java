@@ -5,6 +5,7 @@ import com.example.mutithreading.beans.normal.deadlock.ResourceOne;
 import com.example.mutithreading.beans.normal.deadlock.ResourceTwo;
 import com.example.mutithreading.beans.normal.lock.LockResourceOne;
 import com.example.mutithreading.beans.normal.lock.LockResourceTwo;
+import com.example.mutithreading.beans.normal.producer.SharedQueue;
 import com.example.mutithreading.beans.normal.stampedLock.StampedLockResourceOne;
 import com.example.mutithreading.beans.normal.stampedLock.StampedLockResourceTwo;
 import com.example.mutithreading.beans.staticTypes.Constants;
@@ -13,6 +14,8 @@ import com.example.mutithreading.tasks.runnable.deadlock.TaskOne;
 import com.example.mutithreading.tasks.runnable.deadlock.TaskTwo;
 import com.example.mutithreading.tasks.runnable.lock.LockTaskOne;
 import com.example.mutithreading.tasks.runnable.lock.LockTaskTwo;
+import com.example.mutithreading.tasks.runnable.producerConsumer.Consumer;
+import com.example.mutithreading.tasks.runnable.producerConsumer.Producer;
 import com.example.mutithreading.tasks.runnable.stampedLock.StampedLockTaskOne;
 import com.example.mutithreading.tasks.runnable.stampedLock.StampedLockTaskTwo;
 import com.example.mutithreading.tasks.runnable.tryLock.TryLockTaskOne;
@@ -21,6 +24,7 @@ import com.example.mutithreading.tasks.thread.ThreadExp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -465,6 +469,19 @@ public class ThreadService {
         /*
          * Write senkron olacak şekilde işlemleri sıralamaktadır. Ve her işlem için bir long değer dönmektedir.
          * Read işlemi bir long değer dönmektedir ancak write gibi bir kilitleme işlemi yapmamaktadır.
+         */
+    }
+
+    public void example15() {
+        SharedQueue resource = new SharedQueue(new LinkedList<>(), 3);
+
+        Thread worker1 = new Thread(new Producer(resource, Constants.itemsForPC), "Task-1");
+        Thread worker2 = new Thread(new Consumer(resource, 6), "Task-2");
+
+        worker1.start();
+        worker2.start();
+        /*
+         *
          */
     }
 }

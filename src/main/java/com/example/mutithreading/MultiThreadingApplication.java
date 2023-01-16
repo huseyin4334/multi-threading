@@ -74,6 +74,9 @@ public class MultiThreadingApplication implements CommandLineRunner {
 		//threadService.example14(Constants.WRITE);
 		//threadService.example14(Constants.READ);
 
+		// Example 15 - Producer-Consumer Problem
+		threadService.example15();
+
 	}
 
 }

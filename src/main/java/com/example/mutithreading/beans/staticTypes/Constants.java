@@ -12,6 +12,11 @@ public class Constants {
             "https://skillsoft.com/leadersip-teams"
     );
 
+    public static final List<String> itemsForPC = List.of(
+            "huseyin", "kalcik", "mehmet", "kaan", "mert", "taha", "serdar",
+            "ahmet", "baykal", "selim", "cem", "ferhat", "baris", "duygu", "samet"
+    );
+
     public static int myNum;
 
     public static final String WRITE = "write";
