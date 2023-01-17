@@ -5,6 +5,7 @@ import com.example.mutithreading.beans.normal.deadlock.ResourceOne;
 import com.example.mutithreading.beans.normal.deadlock.ResourceTwo;
 import com.example.mutithreading.beans.normal.lock.LockResourceOne;
 import com.example.mutithreading.beans.normal.lock.LockResourceTwo;
+import com.example.mutithreading.beans.normal.producer.LockSharedQueue;
 import com.example.mutithreading.beans.normal.producer.SharedQueue;
 import com.example.mutithreading.beans.normal.stampedLock.StampedLockResourceOne;
 import com.example.mutithreading.beans.normal.stampedLock.StampedLockResourceTwo;
@@ -14,8 +15,7 @@ import com.example.mutithreading.tasks.runnable.deadlock.TaskOne;
 import com.example.mutithreading.tasks.runnable.deadlock.TaskTwo;
 import com.example.mutithreading.tasks.runnable.lock.LockTaskOne;
 import com.example.mutithreading.tasks.runnable.lock.LockTaskTwo;
-import com.example.mutithreading.tasks.runnable.producerConsumer.Consumer;
-import com.example.mutithreading.tasks.runnable.producerConsumer.Producer;
+import com.example.mutithreading.tasks.runnable.producerConsumer.*;
 import com.example.mutithreading.tasks.runnable.stampedLock.StampedLockTaskOne;
 import com.example.mutithreading.tasks.runnable.stampedLock.StampedLockTaskTwo;
 import com.example.mutithreading.tasks.runnable.tryLock.TryLockTaskOne;
@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
@@ -482,6 +483,48 @@ public class ThreadService {
         worker2.start();
         /*
          *
+         */
+    }
+
+    public void example16WithLock() {
+        LockSharedQueue resource = new LockSharedQueue(new LinkedList<>(), 3);
+
+        Thread worker1 = new Thread(new LockProducer(resource, Constants.itemsForPC), "Producer-1");
+        Thread worker2 = new Thread(new LockProducer(resource, Constants.itemsForPC), "Producer-1");
+
+        Thread worker3 = new Thread(new LockConsumer(resource, 2), "Consumer-1");
+        Thread worker4 = new Thread(new LockConsumer(resource, 6), "Consumer-2");
+
+        worker1.start();
+        worker2.start();
+        worker3.start();
+        worker4.start();
+        /*
+         * await ve signal yapıları kullanılmıştır.
+         * await işlemi signal gelene kadar durdurur ve kilidi kaldırır.
+         * signal geldiğinde bekleyen await'lerden biri aktive olur ve kilitde aktive olur.
+         * Böylece producer consumer'ın, consumerda producer'ın kilidini ve bekleme işlemini sonlandırır.
+         * await birden çok thread tarafından üzerinde çalışılan kaynağı doğru durdurma ve işlemi devam ettirme olanağı sağlar.
+         */
+    }
+
+    public void example16WithArray() {
+        ArrayBlockingQueue<String> resource = new ArrayBlockingQueue<>(4);
+
+        Thread worker1 = new Thread(new BlockProducer(resource, Constants.itemsForPC), "Producer-1");
+        Thread worker2 = new Thread(new BlockProducer(resource, Constants.itemsForPC), "Producer-2");
+
+        Thread worker3 = new Thread(new BlockConsumer(resource, 2), "Consumer-1");
+        Thread worker4 = new Thread(new BlockConsumer(resource, 6), "Consumer-2");
+        Thread worker5 = new Thread(new BlockConsumer(resource, 3), "Consumer-3");
+
+        worker1.start();
+        worker2.start();
+        worker3.start();
+        worker4.start();
+        worker5.start();
+        /*
+         * exampleWithLock işleminin aynısını hazır ArrayBlockingQueue yardımıyla yapılmış örneğidir.
          */
     }
 }
