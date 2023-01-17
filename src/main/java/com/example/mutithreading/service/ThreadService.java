@@ -1,6 +1,7 @@
 package com.example.mutithreading.service;
 
 import com.example.mutithreading.beans.normal.Counter;
+import com.example.mutithreading.beans.normal.SemaphoreSource;
 import com.example.mutithreading.beans.normal.deadlock.ResourceOne;
 import com.example.mutithreading.beans.normal.deadlock.ResourceTwo;
 import com.example.mutithreading.beans.normal.lock.LockResourceOne;
@@ -16,6 +17,8 @@ import com.example.mutithreading.tasks.runnable.deadlock.TaskTwo;
 import com.example.mutithreading.tasks.runnable.lock.LockTaskOne;
 import com.example.mutithreading.tasks.runnable.lock.LockTaskTwo;
 import com.example.mutithreading.tasks.runnable.producerConsumer.*;
+import com.example.mutithreading.tasks.runnable.semaphore.PermitTask;
+import com.example.mutithreading.tasks.runnable.semaphore.SemaphoreTask;
 import com.example.mutithreading.tasks.runnable.stampedLock.StampedLockTaskOne;
 import com.example.mutithreading.tasks.runnable.stampedLock.StampedLockTaskTwo;
 import com.example.mutithreading.tasks.runnable.tryLock.TryLockTaskOne;
@@ -25,8 +28,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -526,5 +531,31 @@ public class ThreadService {
         /*
          * exampleWithLock işleminin aynısını hazır ArrayBlockingQueue yardımıyla yapılmış örneğidir.
          */
+    }
+
+    public void example17() {
+        Semaphore worker = new Semaphore(4);
+        SemaphoreSource resource = new SemaphoreSource();
+        Counter counter = new Counter();
+
+        for (int i = 0; i < 10; i++) {
+            Thread thread = new Thread(new SemaphoreTask(worker, resource, counter), "Task-" + i);
+            thread.start();
+        }
+    }
+
+    public void example18() {
+        int maxPermits = 4;
+
+        Semaphore worker = new Semaphore(maxPermits);
+        SemaphoreSource resource = new SemaphoreSource();
+
+        Random random = new Random();
+
+        for (int i = 0; i < 10; i++) {
+            int permits = random.nextInt(maxPermits) + 1;
+            Thread thread = new Thread(new PermitTask(worker, resource, permits), "Task-" + i);
+            thread.start();
+        }
     }
 }

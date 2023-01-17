@@ -15,6 +15,10 @@ public class Counter {
         myNum++;
     }
 
+    public synchronized void syncNegative() {
+        myNum--;
+    }
+
     public void syncIterate2() {
         synchronized (this) {
             // synchronized block

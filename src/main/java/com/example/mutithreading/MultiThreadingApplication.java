@@ -81,6 +81,12 @@ public class MultiThreadingApplication implements CommandLineRunner {
 		//threadService.example16WithLock();
 		//threadService.example16WithArray();
 
+		// Example 17 - Semaphore
+		//threadService.example17();
+
+		// Example 17 - Semaphore Permits
+		threadService.example18();
+
 	}
 
 }
